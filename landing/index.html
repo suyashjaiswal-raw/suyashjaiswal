@@ -1,0 +1,222 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Auli: join the waitlist</title>
+<style>
+  :root { --bg:#fbfaf7; --ink:#1d1c1a; --muted:#6b6862; --line:#e4e0d8; --accent:#2f6fdb; }
+  @media (prefers-color-scheme: dark) { :root { --bg:#161513; --ink:#f2efe9; --muted:#a29e96; --line:#2c2a26; --accent:#6c9dfc; } }
+  * { box-sizing: border-box; }
+  body { margin:0; background:var(--bg); color:var(--ink); font:16px/1.5 system-ui,-apple-system,Segoe UI,Roboto,sans-serif; }
+  main { max-width:640px; margin:0 auto; padding:56px 16px 96px; }
+  h1 { font-size:clamp(2rem,6vw,2.75rem); line-height:1.1; margin:0 0 12px; }
+  .sub { color:var(--muted); font-size:1.125rem; margin:0 0 32px; }
+  .brand { font-weight:700; letter-spacing:.02em; margin-bottom:40px; }
+  ul.points { padding-left:20px; margin:0 0 32px; }
+  fieldset { border:0; padding:0; margin:0 0 20px; }
+  legend { font-weight:600; margin-bottom:8px; }
+  .prices { display:grid; grid-template-columns:repeat(3,1fr); gap:8px; }
+  .prices label { border:1px solid var(--line); border-radius:8px; padding:12px 8px; text-align:center; cursor:pointer; }
+  .prices input { position:absolute; opacity:0; }
+  .prices label:has(input:checked) { border-color:var(--accent); box-shadow:0 0 0 1px var(--accent); }
+  .prices label:has(input:focus-visible) { outline:2px solid var(--accent); outline-offset:2px; }
+  .prices strong { display:block; font-size:1.25rem; }
+  .prices span { color:var(--muted); font-size:.8125rem; }
+  input[type=email] { width:100%; padding:12px; font:inherit; border:1px solid var(--line); border-radius:8px; background:transparent; color:inherit; }
+  button.cta { width:100%; margin-top:12px; padding:14px; font:inherit; font-weight:600; color:#fff; background:var(--accent); border:0; border-radius:8px; cursor:pointer; }
+  button.cta:disabled { opacity:.6; cursor:default; }
+  .fine { color:var(--muted); font-size:.8125rem; margin-top:12px; }
+  #done { display:none; border:1px solid var(--accent); border-radius:8px; padding:16px; }
+  #consent { position:fixed; left:0; right:0; bottom:0; background:var(--bg); border-top:1px solid var(--line); padding:12px 16px; display:none; }
+  #consent div { max-width:640px; margin:0 auto; display:flex; gap:8px; align-items:center; flex-wrap:wrap; }
+  #consent p { margin:0; flex:1 1 260px; font-size:.875rem; }
+  #consent button { padding:8px 14px; font:inherit; border-radius:8px; border:1px solid var(--line); background:transparent; color:inherit; cursor:pointer; }
+  #consent button.yes { background:var(--accent); border-color:var(--accent); color:#fff; }
+  a { color:var(--accent); }
+</style>
+</head>
+<body>
+<main>
+  <div class="brand">Auli</div>
+  <h1 id="headline"></h1>
+  <p class="sub" id="sub"></p>
+  <ul class="points" id="points"></ul>
+
+  <form id="form" novalidate>
+    <fieldset>
+      <legend id="price-legend"></legend>
+      <div class="prices" id="prices"></div>
+    </fieldset>
+    <label for="email" class="fine" id="email-label"></label>
+    <input id="email" type="email" required autocomplete="email" placeholder="you@example.com">
+    <button class="cta" id="cta" type="submit"></button>
+    <p class="fine" id="legal"></p>
+  </form>
+  <div id="done" role="status"></div>
+  <p class="fine"><a href="#" id="dnss" hidden>Do not sell or share my personal information</a></p>
+</main>
+
+<div id="consent" role="dialog" aria-label="Cookie consent">
+  <div>
+    <p id="consent-text"></p>
+    <button id="consent-no" type="button"></button>
+    <button id="consent-yes" class="yes" type="button"></button>
+  </div>
+</div>
+
+<script>
+/* ---------- CONFIG: edit these before launch ---------- */
+const CONFIG = {
+  // Where signups and events are POSTed as JSON. Leave empty to log to the console only.
+  // Swap in a Formspree / Tally / Google Apps Script / your own endpoint URL.
+  endpoint: '',
+  // REPLACE with what Auli actually does. Keep each line to one concrete benefit.
+  copy: {
+    en: {
+      headline: 'Auli: [one-line promise of what Auli does]',
+      sub: '[One sentence on who it is for and the problem it solves.]',
+      points: ['[Benefit 1]', '[Benefit 2]', '[Benefit 3]'],
+      priceLegend: 'What would you pay each month?',
+      emailLabel: 'Email address',
+      cta: 'Join the waitlist',
+      done: 'You are on the list. Check your inbox to confirm your email.',
+      doneUS: 'You are on the list. We will email you when the beta opens.',
+      legal: 'No spam. Unsubscribe any time.',
+      legalEU: 'We will email you once to confirm your address, then only about the Auli beta. Unsubscribe any time. See our privacy policy.',
+      consent: 'We use cookies to measure which messages work. Accept analytics cookies?',
+      accept: 'Accept', decline: 'Decline', perMonth: 'per month', invalid: 'Please enter a valid email address.'
+    },
+    de: {
+      headline: 'Auli: [Ein-Satz-Versprechen]',
+      sub: '[Ein Satz dazu, für wen Auli ist und welches Problem es löst.]',
+      points: ['[Vorteil 1]', '[Vorteil 2]', '[Vorteil 3]'],
+      priceLegend: 'Was würden Sie pro Monat zahlen?',
+      emailLabel: 'E-Mail-Adresse',
+      cta: 'Auf die Warteliste',
+      done: 'Sie sind auf der Liste. Bitte bestätigen Sie Ihre E-Mail-Adresse in Ihrem Postfach.',
+      legalEU: 'Wir senden Ihnen einmal eine Bestätigung und danach nur Neuigkeiten zur Auli-Beta. Abmeldung jederzeit möglich. Siehe Datenschutzerklärung.',
+      consent: 'Wir verwenden Cookies, um zu messen, welche Botschaften wirken. Analyse-Cookies akzeptieren?',
+      accept: 'Akzeptieren', decline: 'Ablehnen', perMonth: 'pro Monat', invalid: 'Bitte geben Sie eine gültige E-Mail-Adresse ein.'
+    },
+    fr: {
+      headline: 'Auli : [promesse en une phrase]',
+      sub: '[Une phrase sur le public visé et le problème résolu.]',
+      points: ['[Avantage 1]', '[Avantage 2]', '[Avantage 3]'],
+      priceLegend: 'Combien paieriez-vous par mois ?',
+      emailLabel: 'Adresse e-mail',
+      cta: 'Rejoindre la liste d’attente',
+      done: 'Vous êtes inscrit. Vérifiez votre boîte mail pour confirmer votre adresse.',
+      legalEU: 'Nous vous enverrons un e-mail de confirmation, puis uniquement des nouvelles de la bêta Auli. Désinscription possible à tout moment. Voir la politique de confidentialité.',
+      consent: 'Nous utilisons des cookies pour mesurer les messages efficaces. Accepter les cookies de mesure ?',
+      accept: 'Accepter', decline: 'Refuser', perMonth: 'par mois', invalid: 'Veuillez saisir une adresse e-mail valide.'
+    }
+  },
+  // Placeholder price points to test. Replace with your real hypotheses.
+  markets: {
+    us: { lang: 'en', currency: 'USD', locale: 'en-US', prices: [4.99, 9.99, 14.99], consent: false },
+    uk: { lang: 'en', currency: 'GBP', locale: 'en-GB', prices: [3.99, 7.99, 11.99], consent: true },
+    nl: { lang: 'en', currency: 'EUR', locale: 'nl-NL', prices: [4.99, 8.99, 12.99], consent: true },
+    de: { lang: 'de', currency: 'EUR', locale: 'de-DE', prices: [4.99, 8.99, 12.99], consent: true },
+    fr: { lang: 'fr', currency: 'EUR', locale: 'fr-FR', prices: [4.99, 8.99, 12.99], consent: true }
+  }
+};
+
+/* ---------- Market + attribution ---------- */
+const qs = new URLSearchParams(location.search);
+const guess = () => {
+  const l = (navigator.language || 'en-US').toLowerCase();
+  if (l.startsWith('de')) return 'de';
+  if (l.startsWith('fr')) return 'fr';
+  if (l.startsWith('nl')) return 'nl';
+  if (l === 'en-gb') return 'uk';
+  return 'us';
+};
+const marketKey = CONFIG.markets[qs.get('m')] ? qs.get('m') : guess();
+const market = CONFIG.markets[marketKey];
+// ?v= lets you A/B test creatives: landing/?m=us&v=b&utm_source=meta&utm_campaign=...
+const attribution = {
+  market: marketKey,
+  variant: qs.get('v') || 'a',
+  utm_source: qs.get('utm_source') || '',
+  utm_medium: qs.get('utm_medium') || '',
+  utm_campaign: qs.get('utm_campaign') || '',
+  utm_content: qs.get('utm_content') || ''
+};
+
+/* ---------- Copy ---------- */
+const t = Object.assign({}, CONFIG.copy.en, CONFIG.copy[market.lang]);
+document.documentElement.lang = market.lang;
+document.getElementById('headline').textContent = t.headline;
+document.getElementById('sub').textContent = t.sub;
+document.getElementById('points').innerHTML = t.points.map(p => '<li></li>').join('');
+document.querySelectorAll('#points li').forEach((li, i) => { li.textContent = t.points[i]; });
+document.getElementById('price-legend').textContent = t.priceLegend;
+document.getElementById('email-label').textContent = t.emailLabel;
+document.getElementById('cta').textContent = t.cta;
+document.getElementById('legal').textContent = market.consent ? t.legalEU : t.legal;
+if (!market.consent) document.getElementById('dnss').hidden = false;
+
+const fmt = new Intl.NumberFormat(market.locale, { style: 'currency', currency: market.currency });
+const pricesEl = document.getElementById('prices');
+market.prices.forEach((p, i) => {
+  const label = document.createElement('label');
+  label.innerHTML = '<input type="radio" name="price" value="' + p + '"><strong></strong><span></span>';
+  label.querySelector('strong').textContent = fmt.format(p);
+  label.querySelector('span').textContent = t.perMonth;
+  label.querySelector('input').addEventListener('change', () => track('price_click', { price: p, currency: market.currency }));
+  pricesEl.appendChild(label);
+});
+
+/* ---------- Consent-gated tracking ---------- */
+const CONSENT_KEY = 'auli_consent';
+const safeGet = k => { try { return localStorage.getItem(k); } catch (e) { return null; } };
+const safeSet = (k, v) => { try { localStorage.setItem(k, v); } catch (e) {} };
+const hasConsent = () => !market.consent || safeGet(CONSENT_KEY) === 'yes';
+const optedOutUS = () => safeGet('auli_dnss') === 'yes';
+
+function track(name, extra) {
+  if (!hasConsent() || optedOutUS()) return;
+  const payload = Object.assign({ event: name, ts: new Date().toISOString() }, attribution, extra || {});
+  send(payload);
+}
+function send(payload) {
+  if (!CONFIG.endpoint) { console.log('[auli]', payload); return; }
+  const body = JSON.stringify(payload);
+  if (navigator.sendBeacon && payload.event !== 'signup') {
+    navigator.sendBeacon(CONFIG.endpoint, new Blob([body], { type: 'text/plain' }));
+  } else {
+    fetch(CONFIG.endpoint, { method: 'POST', headers: { 'Content-Type': 'text/plain' }, body: body, keepalive: true }).catch(() => {});
+  }
+}
+
+const bar = document.getElementById('consent');
+if (market.consent && safeGet(CONSENT_KEY) === null) {
+  document.getElementById('consent-text').textContent = t.consent;
+  document.getElementById('consent-yes').textContent = t.accept;
+  document.getElementById('consent-no').textContent = t.decline;
+  bar.style.display = 'block';
+  document.getElementById('consent-yes').onclick = () => { safeSet(CONSENT_KEY, 'yes'); bar.style.display = 'none'; track('page_view'); };
+  document.getElementById('consent-no').onclick = () => { safeSet(CONSENT_KEY, 'no'); bar.style.display = 'none'; };
+}
+document.getElementById('dnss').onclick = e => { e.preventDefault(); safeSet('auli_dnss', 'yes'); e.target.textContent = 'Preference saved'; };
+track('page_view');
+
+/* ---------- Signup ---------- */
+document.getElementById('form').addEventListener('submit', e => {
+  e.preventDefault();
+  const email = document.getElementById('email').value.trim();
+  if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) { alert(t.invalid); return; }
+  const chosen = document.querySelector('input[name=price]:checked');
+  // A signup is the user's own request, so it is always sent, even without analytics consent.
+  send(Object.assign({ event: 'signup', ts: new Date().toISOString(), email: email,
+    price: chosen ? Number(chosen.value) : null, currency: market.currency,
+    double_opt_in: market.consent }, attribution));
+  document.getElementById('form').style.display = 'none';
+  const done = document.getElementById('done');
+  done.textContent = market.consent ? t.done : (t.doneUS || t.done);
+  done.style.display = 'block';
+});
+</script>
+</body>
+</html>

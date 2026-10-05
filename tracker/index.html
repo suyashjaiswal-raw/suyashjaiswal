@@ -1,0 +1,194 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Auli experiment tracker</title>
+<style>
+  :root { --bg:#fbfaf7; --ink:#1d1c1a; --muted:#6b6862; --line:#e4e0d8; --accent:#2f6fdb; --good:#1f8a4c; --warn:#b7791f; --bad:#c0392b; }
+  @media (prefers-color-scheme: dark) { :root { --bg:#161513; --ink:#f2efe9; --muted:#a29e96; --line:#2c2a26; --accent:#6c9dfc; --good:#4cc380; --warn:#e0a94a; --bad:#ef7b6d; } }
+  * { box-sizing:border-box; }
+  body { margin:0; background:var(--bg); color:var(--ink); font:15px/1.45 system-ui,-apple-system,Segoe UI,Roboto,sans-serif; }
+  main { max-width:1100px; margin:0 auto; padding:24px 16px 64px; }
+  h1 { font-size:1.5rem; margin:0 0 4px; } h2 { font-size:1.0625rem; margin:32px 0 8px; }
+  .muted { color:var(--muted); }
+  .cards { display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:12px; }
+  .card { border:1px solid var(--line); border-radius:10px; padding:14px; }
+  .card h3 { margin:0 0 6px; font-size:1rem; }
+  .card dl { margin:0; display:grid; grid-template-columns:auto 1fr; gap:2px 12px; font-size:.875rem; }
+  .card dt { color:var(--muted); } .card dd { margin:0; text-align:right; font-variant-numeric:tabular-nums; }
+  .bar { height:6px; background:var(--line); border-radius:3px; margin:8px 0 4px; overflow:hidden; }
+  .bar > i { display:block; height:100%; background:var(--accent); }
+  .wrap { overflow-x:auto; }
+  table { border-collapse:collapse; width:100%; min-width:860px; font-size:.875rem; }
+  th, td { text-align:left; padding:8px; border-bottom:1px solid var(--line); vertical-align:top; }
+  th { color:var(--muted); font-weight:600; white-space:nowrap; } td.n { text-align:right; font-variant-numeric:tabular-nums; }
+  .tag { font-weight:600; } .go { color:var(--good); } .iterate { color:var(--warn); } .nogo { color:var(--bad); }
+  form { display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:10px; border:1px solid var(--line); border-radius:10px; padding:14px; }
+  label { display:flex; flex-direction:column; font-size:.8125rem; color:var(--muted); gap:3px; }
+  input, select { font:inherit; padding:8px; border:1px solid var(--line); border-radius:6px; background:transparent; color:var(--ink); }
+  .wide { grid-column:1/-1; }
+  button { font:inherit; padding:8px 14px; border-radius:6px; border:1px solid var(--line); background:transparent; color:var(--ink); cursor:pointer; }
+  button.primary { background:var(--accent); border-color:var(--accent); color:#fff; font-weight:600; }
+  .row { display:flex; gap:8px; flex-wrap:wrap; margin-top:12px; }
+</style>
+</head>
+<body>
+<main>
+  <h1>Auli experiment tracker</h1>
+  <p class="muted">Log every test. Thresholds and budgets come from the validation plan. Data stays in this browser; export CSV to share or back it up.</p>
+
+  <h2>By market</h2>
+  <div class="cards" id="cards"></div>
+
+  <h2>Log an experiment</h2>
+  <form id="form">
+    <label>Start date <input name="date" type="date" required></label>
+    <label>Market <select name="market"><option value="US">US</option><option value="UK">UK</option><option value="EU">EU</option></select></label>
+    <label>Channel <select name="channel"><option>Meta ads</option><option>TikTok ads</option><option>Google Search</option><option>Organic / community</option><option>Interviews</option><option>Beta cohort</option><option>Pricing test</option></select></label>
+    <label>Hypothesis <select name="hyp"><option>H1</option><option selected>H2</option><option>H3</option><option>H4</option><option>H5</option><option>H6</option></select></label>
+    <label>Spend (USD) <input name="spend" type="number" min="0" step="0.01" value="0"></label>
+    <label>Visitors <input name="visitors" type="number" min="0" step="1" value="0"></label>
+    <label>Signups <input name="signups" type="number" min="0" step="1" value="0"></label>
+    <label>Paid-plan clicks <input name="paid" type="number" min="0" step="1" value="0"></label>
+    <label class="wide">Notes / creative / variant <input name="notes" type="text" placeholder="e.g. creative B, DE page, 7 days"></label>
+    <div class="wide row"><button class="primary" type="submit">Add experiment</button></div>
+  </form>
+
+  <h2>Experiments</h2>
+  <div class="wrap"><table>
+    <thead><tr><th>Date</th><th>Market</th><th>Channel</th><th>Hyp.</th><th>Spend</th><th>Visitors</th><th>Signups</th><th>Signup rate</th><th>Cost / signup</th><th>Paid-plan rate</th><th>Read</th><th>Notes</th><th></th></tr></thead>
+    <tbody id="rows"></tbody>
+  </table></div>
+  <div class="row">
+    <button id="export" type="button">Export CSV</button>
+    <button id="import" type="button">Import CSV</button>
+    <input id="file" type="file" accept=".csv,text/csv" hidden>
+  </div>
+  <p class="muted" id="msg" role="status"></p>
+</main>
+<script>
+/* Budgets and thresholds mirror the validation plan. Edit here if you change the plan. */
+const BUDGET = { US: 3600, UK: 2400, EU: 2400 };
+const T = {
+  rate: { go: 12, iterate: 8 },      // % visitor to signup: go >= 12, iterate 8-12, no-go < 8
+  cost: { go: 3, iterate: 6 },       // USD per signup: go < 3, iterate 3-6, no-go > 6
+  paid: { go: 4, iterate: 2 },       // % of signups choosing a paid price
+  minVisitors: 300, minSignups: 50
+};
+const KEY = 'auli_experiments_v1';
+const FIELDS = ['date', 'market', 'channel', 'hyp', 'spend', 'visitors', 'signups', 'paid', 'notes'];
+let items = [];
+try { items = JSON.parse(localStorage.getItem(KEY) || '[]'); } catch (e) { items = []; }
+const save = () => { try { localStorage.setItem(KEY, JSON.stringify(items)); } catch (e) { say('Could not save to browser storage; export CSV to keep your data.'); } };
+const say = m => { document.getElementById('msg').textContent = m; };
+const usd = n => '$' + n.toLocaleString('en-US', { maximumFractionDigits: 2, minimumFractionDigits: n % 1 ? 2 : 0 });
+const pct = n => n.toFixed(1) + '%';
+
+// Returns 'go' | 'iterate' | 'nogo' | 'wait' for the combined signal on a set of rows.
+function verdict(spend, visitors, signups, paid) {
+  if (visitors < T.minVisitors || signups < T.minSignups) return 'wait';
+  const rate = signups / visitors * 100;
+  const cost = spend > 0 ? spend / signups : null;
+  const paidRate = paid / signups * 100;
+  const r = rate >= T.rate.go ? 2 : rate >= T.rate.iterate ? 1 : 0;
+  const c = cost === null ? 2 : cost < T.cost.go ? 2 : cost <= T.cost.iterate ? 1 : 0;
+  const p = paidRate >= T.paid.go ? 2 : paidRate >= T.paid.iterate ? 1 : 0;
+  const worst = Math.min(r, c, p);
+  return worst === 2 ? 'go' : worst === 1 ? 'iterate' : 'nogo';
+}
+const LABEL = { go: 'Go', iterate: 'Iterate', nogo: 'No-go', wait: 'Need more data' };
+
+function el(tag, cls, text) { const e = document.createElement(tag); if (cls) e.className = cls; if (text !== undefined) e.textContent = text; return e; }
+
+function render() {
+  const rows = document.getElementById('rows'); rows.innerHTML = '';
+  items.slice().sort((a, b) => b.date.localeCompare(a.date)).forEach(x => {
+    const tr = document.createElement('tr');
+    const rate = x.visitors ? x.signups / x.visitors * 100 : null;
+    const cost = x.signups && x.spend ? x.spend / x.signups : null;
+    const paidRate = x.signups ? x.paid / x.signups * 100 : null;
+    const v = verdict(x.spend, x.visitors, x.signups, x.paid);
+    const cells = [x.date, x.market, x.channel, x.hyp];
+    cells.forEach(c => tr.appendChild(el('td', '', c)));
+    [usd(x.spend), x.visitors, x.signups, rate === null ? '-' : pct(rate), cost === null ? '-' : usd(cost), paidRate === null ? '-' : pct(paidRate)]
+      .forEach(c => tr.appendChild(el('td', 'n', String(c))));
+    tr.appendChild(el('td', 'tag ' + v, LABEL[v]));
+    tr.appendChild(el('td', '', x.notes));
+    const td = document.createElement('td'); const b = el('button', '', 'Delete'); b.type = 'button';
+    b.onclick = () => { items = items.filter(i => i.id !== x.id); save(); render(); };
+    td.appendChild(b); tr.appendChild(td); rows.appendChild(tr);
+  });
+
+  const cards = document.getElementById('cards'); cards.innerHTML = '';
+  ['US', 'UK', 'EU'].forEach(m => {
+    const own = items.filter(i => i.market === m);
+    const sum = k => own.reduce((s, i) => s + i[k], 0);
+    const spend = sum('spend'), visitors = sum('visitors'), signups = sum('signups'), paid = sum('paid');
+    const v = verdict(spend, visitors, signups, paid);
+    const card = el('div', 'card'); card.appendChild(el('h3', '', m + ' '));
+    card.firstChild.appendChild(el('span', 'tag ' + v, LABEL[v]));
+    const dl = el('dl');
+    [['Spend', usd(spend) + ' of ' + usd(BUDGET[m])], ['Visitors', visitors], ['Signups', signups],
+     ['Signup rate', visitors ? pct(signups / visitors * 100) : '-'],
+     ['Cost / signup', signups && spend ? usd(spend / signups) : '-'],
+     ['Paid-plan rate', signups ? pct(paid / signups * 100) : '-']]
+      .forEach(([k, val]) => { dl.appendChild(el('dt', '', k)); dl.appendChild(el('dd', '', String(val))); });
+    card.appendChild(dl);
+    const bar = el('div', 'bar'); const fill = el('i'); fill.style.width = Math.min(100, spend / BUDGET[m] * 100) + '%';
+    bar.appendChild(fill); card.appendChild(bar);
+    cards.appendChild(card);
+  });
+}
+
+document.getElementById('form').addEventListener('submit', e => {
+  e.preventDefault();
+  const f = new FormData(e.target);
+  const num = k => Math.max(0, Number(f.get(k)) || 0);
+  items.push({ id: Date.now() + Math.random().toString(16).slice(2), date: f.get('date'), market: f.get('market'), channel: f.get('channel'),
+    hyp: f.get('hyp'), spend: num('spend'), visitors: num('visitors'), signups: num('signups'), paid: num('paid'), notes: String(f.get('notes') || '') });
+  save(); render(); e.target.reset(); say('Added.');
+});
+
+/* CSV: values are quoted, and cells starting with = + - @ get a leading apostrophe-free guard so spreadsheets do not run them as formulas. */
+const guard = s => /^[=+\-@\t\r]/.test(s) ? "'" + s : s;
+const q = v => '"' + guard(String(v)).replace(/"/g, '""') + '"';
+document.getElementById('export').onclick = () => {
+  const lines = [FIELDS.join(',')].concat(items.map(i => FIELDS.map(k => q(i[k])).join(',')));
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob([lines.join('\n')], { type: 'text/csv' }));
+  a.download = 'auli-experiments.csv'; a.click(); URL.revokeObjectURL(a.href);
+};
+function parseCSV(text) {
+  const out = []; let row = [], cur = '', inQ = false;
+  for (let i = 0; i < text.length; i++) {
+    const c = text[i];
+    if (inQ) { if (c === '"' && text[i + 1] === '"') { cur += '"'; i++; } else if (c === '"') inQ = false; else cur += c; }
+    else if (c === '"') inQ = true;
+    else if (c === ',') { row.push(cur); cur = ''; }
+    else if (c === '\n' || c === '\r') { if (c === '\r' && text[i + 1] === '\n') i++; row.push(cur); out.push(row); row = []; cur = ''; }
+    else cur += c;
+  }
+  if (cur || row.length) { row.push(cur); out.push(row); }
+  return out;
+}
+document.getElementById('import').onclick = () => document.getElementById('file').click();
+document.getElementById('file').onchange = e => {
+  const file = e.target.files[0]; if (!file) return;
+  file.text().then(text => {
+    const [head, ...body] = parseCSV(text).filter(r => r.length > 1);
+    if (!head || FIELDS.some(f => !head.includes(f))) { say('Import failed: header must contain ' + FIELDS.join(', ') + '.'); return; }
+    const idx = Object.fromEntries(head.map((h, i) => [h, i]));
+    const num = s => Math.max(0, Number(s) || 0);
+    const added = body.map(r => ({ id: Date.now() + Math.random().toString(16).slice(2), date: r[idx.date], market: ['US', 'UK', 'EU'].includes(r[idx.market]) ? r[idx.market] : 'US',
+      channel: r[idx.channel], hyp: r[idx.hyp], spend: num(r[idx.spend]), visitors: num(r[idx.visitors]), signups: num(r[idx.signups]), paid: num(r[idx.paid]),
+      notes: (r[idx.notes] || '').replace(/^'/, '') }));
+    items = items.concat(added); save(); render(); say('Imported ' + added.length + ' rows.');
+  });
+  e.target.value = '';
+};
+document.querySelector('input[name=date]').valueAsDate = new Date();
+render();
+</script>
+</body>
+</html>
