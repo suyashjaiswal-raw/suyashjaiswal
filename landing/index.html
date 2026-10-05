@@ -3,37 +3,45 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Auli: join the waitlist</title>
+<meta name="color-scheme" content="dark">
+<title>Auli: the operating system for your dog's life</title>
 <style>
-  :root { --bg:#fbfaf7; --ink:#1d1c1a; --muted:#6b6862; --line:#e4e0d8; --accent:#2f6fdb; }
-  @media (prefers-color-scheme: dark) { :root { --bg:#161513; --ink:#f2efe9; --muted:#a29e96; --line:#2c2a26; --accent:#6c9dfc; } }
-  * { box-sizing: border-box; }
-  body { margin:0; background:var(--bg); color:var(--ink); font:16px/1.5 system-ui,-apple-system,Segoe UI,Roboto,sans-serif; }
-  main { max-width:640px; margin:0 auto; padding:56px 16px 96px; }
-  h1 { font-size:clamp(2rem,6vw,2.75rem); line-height:1.1; margin:0 0 12px; }
-  .sub { color:var(--muted); font-size:1.125rem; margin:0 0 32px; }
-  .brand { font-weight:700; letter-spacing:.02em; margin-bottom:40px; }
-  ul.points { padding-left:20px; margin:0 0 32px; }
+  :root { --bg:#0e0d0b; --panel:#171512; --ink:#f4f0e8; --muted:#a39d90; --line:#2d2a24; --gold:#c9a35a; --gold-ink:#17130a; }
+  * { box-sizing:border-box; }
+  body { margin:0; background:var(--bg); color:var(--ink); font:16px/1.55 system-ui,-apple-system,Segoe UI,Roboto,sans-serif; }
+  main { max-width:640px; margin:0 auto; padding:48px 16px 120px; }
+  .brand { font-weight:700; letter-spacing:.18em; text-transform:uppercase; color:var(--gold); margin-bottom:40px; }
+  h1 { font-size:clamp(2rem,6vw,2.875rem); line-height:1.1; margin:0 0 16px; font-weight:700; }
+  .sub { color:var(--muted); font-size:1.125rem; margin:0 0 28px; }
+  ul.points { padding:0; margin:0 0 32px; list-style:none; }
+  ul.points li { padding:10px 0 10px 28px; position:relative; border-bottom:1px solid var(--line); }
+  ul.points li::before { content:""; position:absolute; left:4px; top:19px; width:8px; height:8px; border-radius:50%; background:var(--gold); }
+  .panel { background:var(--panel); border:1px solid var(--line); border-radius:14px; padding:20px; }
   fieldset { border:0; padding:0; margin:0 0 20px; }
-  legend { font-weight:600; margin-bottom:8px; }
+  legend { font-weight:600; margin-bottom:4px; }
+  .hint { color:var(--muted); font-size:.8125rem; margin:0 0 10px; }
   .prices { display:grid; grid-template-columns:repeat(3,1fr); gap:8px; }
-  .prices label { border:1px solid var(--line); border-radius:8px; padding:12px 8px; text-align:center; cursor:pointer; }
-  .prices input { position:absolute; opacity:0; }
-  .prices label:has(input:checked) { border-color:var(--accent); box-shadow:0 0 0 1px var(--accent); }
-  .prices label:has(input:focus-visible) { outline:2px solid var(--accent); outline-offset:2px; }
+  .prices label { border:1px solid var(--line); border-radius:10px; padding:12px 8px; text-align:center; cursor:pointer; position:relative; }
+  .prices input { position:absolute; opacity:0; inset:0; cursor:pointer; }
+  .prices label:has(input:checked) { border-color:var(--gold); box-shadow:0 0 0 1px var(--gold); }
+  .prices label:has(input:focus-visible) { outline:2px solid var(--gold); outline-offset:2px; }
   .prices strong { display:block; font-size:1.25rem; }
   .prices span { color:var(--muted); font-size:.8125rem; }
-  input[type=email] { width:100%; padding:12px; font:inherit; border:1px solid var(--line); border-radius:8px; background:transparent; color:inherit; }
-  button.cta { width:100%; margin-top:12px; padding:14px; font:inherit; font-weight:600; color:#fff; background:var(--accent); border:0; border-radius:8px; cursor:pointer; }
-  button.cta:disabled { opacity:.6; cursor:default; }
-  .fine { color:var(--muted); font-size:.8125rem; margin-top:12px; }
-  #done { display:none; border:1px solid var(--accent); border-radius:8px; padding:16px; }
-  #consent { position:fixed; left:0; right:0; bottom:0; background:var(--bg); border-top:1px solid var(--line); padding:12px 16px; display:none; }
+  .field { display:block; margin-bottom:12px; }
+  .field > span { display:block; font-size:.8125rem; color:var(--muted); margin-bottom:4px; }
+  input[type=email], input[type=text], input[type=number] { width:100%; padding:13px; font:inherit; border:1px solid var(--line); border-radius:10px; background:var(--bg); color:inherit; }
+  input:focus-visible { outline:2px solid var(--gold); outline-offset:1px; }
+  button.cta { width:100%; margin-top:8px; padding:15px; font:inherit; font-weight:700; color:var(--gold-ink); background:var(--gold); border:0; border-radius:10px; cursor:pointer; }
+  .fine { color:var(--muted); font-size:.8125rem; margin:12px 0 0; }
+  #done { display:none; border:1px solid var(--gold); border-radius:14px; padding:20px; }
+  .switch { margin-top:28px; text-align:center; }
+  a { color:var(--gold); }
+  #consent { position:fixed; left:0; right:0; bottom:0; background:var(--panel); border-top:1px solid var(--line); padding:12px 16px; display:none; }
   #consent div { max-width:640px; margin:0 auto; display:flex; gap:8px; align-items:center; flex-wrap:wrap; }
   #consent p { margin:0; flex:1 1 260px; font-size:.875rem; }
   #consent button { padding:8px 14px; font:inherit; border-radius:8px; border:1px solid var(--line); background:transparent; color:inherit; cursor:pointer; }
-  #consent button.yes { background:var(--accent); border-color:var(--accent); color:#fff; }
-  a { color:var(--accent); }
+  #consent button.yes { background:var(--gold); border-color:var(--gold); color:var(--gold-ink); font-weight:600; }
+  [hidden] { display:none !important; }
 </style>
 </head>
 <body>
@@ -43,130 +51,140 @@
   <p class="sub" id="sub"></p>
   <ul class="points" id="points"></ul>
 
-  <form id="form" novalidate>
-    <fieldset>
-      <legend id="price-legend"></legend>
-      <div class="prices" id="prices"></div>
-    </fieldset>
-    <label for="email" class="fine" id="email-label"></label>
-    <input id="email" type="email" required autocomplete="email" placeholder="you@example.com">
-    <button class="cta" id="cta" type="submit"></button>
-    <p class="fine" id="legal"></p>
-  </form>
-  <div id="done" role="status"></div>
-  <p class="fine"><a href="#" id="dnss" hidden>Do not sell or share my personal information</a></p>
+  <div class="panel">
+    <form id="form" novalidate>
+      <fieldset id="price-set">
+        <legend id="price-legend"></legend>
+        <p class="hint" id="price-hint"></p>
+        <div class="prices" id="prices"></div>
+      </fieldset>
+      <label class="field" id="org-field" hidden><span>Organisation name</span><input id="org" type="text" autocomplete="organization"></label>
+      <label class="field" id="dogs-field" hidden><span>Dogs currently in your care</span><input id="dogs" type="number" min="0" inputmode="numeric"></label>
+      <label class="field"><span id="email-label"></span><input id="email" type="email" required autocomplete="email" placeholder="you@example.com"></label>
+      <button class="cta" id="cta" type="submit"></button>
+      <p class="fine" id="legal"></p>
+    </form>
+    <div id="done" role="status"></div>
+  </div>
+
+  <p class="switch fine"><a href="#" id="switch"></a></p>
+  <p class="fine" style="text-align:center"><a href="#" id="dnss" hidden>Do not sell or share my personal information</a></p>
 </main>
 
 <div id="consent" role="dialog" aria-label="Cookie consent">
   <div>
-    <p id="consent-text"></p>
-    <button id="consent-no" type="button"></button>
-    <button id="consent-yes" class="yes" type="button"></button>
+    <p id="consent-text">We use cookies to measure which messages work. Accept analytics cookies?</p>
+    <button id="consent-no" type="button">Decline</button>
+    <button id="consent-yes" class="yes" type="button">Accept</button>
   </div>
 </div>
 
 <script>
-/* ---------- CONFIG: edit these before launch ---------- */
+/* ---------- CONFIG: edit before launch ---------- */
 const CONFIG = {
-  // Where signups and events are POSTed as JSON. Leave empty to log to the console only.
-  // Swap in a Formspree / Tally / Google Apps Script / your own endpoint URL.
+  // Signups and events are POSTed here as JSON (text/plain, so no CORS preflight).
+  // Works with a Google Apps Script web app, Formspree, or your own endpoint. Empty = console only.
   endpoint: '',
-  // REPLACE with what Auli actually does. Keep each line to one concrete benefit.
-  copy: {
-    en: {
-      headline: 'Auli: [one-line promise of what Auli does]',
-      sub: '[One sentence on who it is for and the problem it solves.]',
-      points: ['[Benefit 1]', '[Benefit 2]', '[Benefit 3]'],
-      priceLegend: 'What would you pay each month?',
-      emailLabel: 'Email address',
-      cta: 'Join the waitlist',
-      done: 'You are on the list. Check your inbox to confirm your email.',
-      doneUS: 'You are on the list. We will email you when the beta opens.',
-      legal: 'No spam. Unsubscribe any time.',
-      legalEU: 'We will email you once to confirm your address, then only about the Auli beta. Unsubscribe any time. See our privacy policy.',
-      consent: 'We use cookies to measure which messages work. Accept analytics cookies?',
-      accept: 'Accept', decline: 'Decline', perMonth: 'per month', invalid: 'Please enter a valid email address.'
-    },
-    de: {
-      headline: 'Auli: [Ein-Satz-Versprechen]',
-      sub: '[Ein Satz dazu, für wen Auli ist und welches Problem es löst.]',
-      points: ['[Vorteil 1]', '[Vorteil 2]', '[Vorteil 3]'],
-      priceLegend: 'Was würden Sie pro Monat zahlen?',
-      emailLabel: 'E-Mail-Adresse',
-      cta: 'Auf die Warteliste',
-      done: 'Sie sind auf der Liste. Bitte bestätigen Sie Ihre E-Mail-Adresse in Ihrem Postfach.',
-      legalEU: 'Wir senden Ihnen einmal eine Bestätigung und danach nur Neuigkeiten zur Auli-Beta. Abmeldung jederzeit möglich. Siehe Datenschutzerklärung.',
-      consent: 'Wir verwenden Cookies, um zu messen, welche Botschaften wirken. Analyse-Cookies akzeptieren?',
-      accept: 'Akzeptieren', decline: 'Ablehnen', perMonth: 'pro Monat', invalid: 'Bitte geben Sie eine gültige E-Mail-Adresse ein.'
-    },
-    fr: {
-      headline: 'Auli : [promesse en une phrase]',
-      sub: '[Une phrase sur le public visé et le problème résolu.]',
-      points: ['[Avantage 1]', '[Avantage 2]', '[Avantage 3]'],
-      priceLegend: 'Combien paieriez-vous par mois ?',
-      emailLabel: 'Adresse e-mail',
-      cta: 'Rejoindre la liste d’attente',
-      done: 'Vous êtes inscrit. Vérifiez votre boîte mail pour confirmer votre adresse.',
-      legalEU: 'Nous vous enverrons un e-mail de confirmation, puis uniquement des nouvelles de la bêta Auli. Désinscription possible à tout moment. Voir la politique de confidentialité.',
-      consent: 'Nous utilisons des cookies pour mesurer les messages efficaces. Accepter les cookies de mesure ?',
-      accept: 'Accepter', decline: 'Refuser', perMonth: 'par mois', invalid: 'Veuillez saisir une adresse e-mail valide.'
-    }
-  },
-  // Placeholder price points to test. Replace with your real hypotheses.
+  // Auli is English-only today, so every market uses the same copy; only price and currency change.
+  // Pricing points are placeholders for the Auli+ price test: replace with your real hypotheses.
   markets: {
-    us: { lang: 'en', currency: 'USD', locale: 'en-US', prices: [4.99, 9.99, 14.99], consent: false },
-    uk: { lang: 'en', currency: 'GBP', locale: 'en-GB', prices: [3.99, 7.99, 11.99], consent: true },
-    nl: { lang: 'en', currency: 'EUR', locale: 'nl-NL', prices: [4.99, 8.99, 12.99], consent: true },
-    de: { lang: 'de', currency: 'EUR', locale: 'de-DE', prices: [4.99, 8.99, 12.99], consent: true },
-    fr: { lang: 'fr', currency: 'EUR', locale: 'fr-FR', prices: [4.99, 8.99, 12.99], consent: true }
+    us: { currency: 'USD', locale: 'en-US', prices: [7.99, 12.99, 19.99], consent: false },
+    uk: { currency: 'GBP', locale: 'en-GB', prices: [6.49, 9.99, 15.99], consent: true },
+    ie: { currency: 'EUR', locale: 'en-IE', prices: [7.49, 11.99, 17.99], consent: true },
+    nl: { currency: 'EUR', locale: 'en-NL', prices: [7.49, 11.99, 17.99], consent: true },
+    de: { currency: 'EUR', locale: 'en-DE', prices: [7.49, 11.99, 17.99], consent: true }
+  },
+  // Only promise features that work in every test market. Vet booking, pharmacy, insurance and
+  // emergency services are location-dependent: add them to a market's copy only once they are live there.
+  audiences: {
+    dog: {
+      headline: 'The operating system for your dog’s life.',
+      sub: 'Health records, vaccinations, medications and an AI that actually knows your dog. One beautiful app.',
+      points: [
+        'Every record, vaccination and medication in one place, with reminders',
+        'Auli Intelligence: care guidance grounded in your dog’s own profile',
+        'Pawbook: every memory, kept beautifully'
+      ],
+      priceLegend: 'What would you pay each month for Auli+?',
+      priceHint: 'Auli+ unlocks Auli Intelligence. Pick the price that feels fair; this is not a purchase.',
+      cta: 'Join the waitlist',
+      legalUS: 'No spam. Auli Intelligence supports, and does not replace, your vet.',
+      legalEU: 'We will email once to confirm your address, then only about the Auli beta. Unsubscribe any time. Auli Intelligence supports, and does not replace, your vet. See our privacy policy.',
+      doneEU: 'You are on the list. We will email you shortly to confirm your address.',
+      doneUS: 'You are on the list. We will email you when the beta opens.',
+      switchText: 'Run a shelter or rescue? Join the Auli for Shelters waitlist →'
+    },
+    shelter: {
+      headline: 'One workspace for every dog in your care.',
+      sub: 'Auli for Shelters: bulk intake, shared health tracking and daily care logs, built for rescues and shelters.',
+      points: [
+        'Intake dogs in bulk by CSV or QR code',
+        'Roles for owners, managers, caretakers, volunteers and vets',
+        'Shared vaccination records, daily care logs and documents'
+      ],
+      cta: 'Request early access',
+      legalUS: 'No spam. We will reach out to arrange a pilot.',
+      legalEU: 'We will email once to confirm your address and to arrange a pilot. Unsubscribe any time. See our privacy policy.',
+      doneEU: 'Thank you. We will email you shortly to confirm your address and arrange a pilot.',
+      doneUS: 'Thank you. We will be in touch about a pilot.',
+      switchText: 'Have a dog at home? Join the dog parent waitlist →'
+    }
   }
 };
 
-/* ---------- Market + attribution ---------- */
+/* ---------- Market + audience + attribution ---------- */
 const qs = new URLSearchParams(location.search);
 const guess = () => {
   const l = (navigator.language || 'en-US').toLowerCase();
   if (l.startsWith('de')) return 'de';
-  if (l.startsWith('fr')) return 'fr';
   if (l.startsWith('nl')) return 'nl';
+  if (l === 'en-ie') return 'ie';
   if (l === 'en-gb') return 'uk';
   return 'us';
 };
 const marketKey = CONFIG.markets[qs.get('m')] ? qs.get('m') : guess();
 const market = CONFIG.markets[marketKey];
-// ?v= lets you A/B test creatives: landing/?m=us&v=b&utm_source=meta&utm_campaign=...
+const audience = qs.get('a') === 'shelter' ? 'shelter' : 'dog';
+const t = CONFIG.audiences[audience];
+// ?v= tags a creative variant. Example: ?m=uk&v=b&utm_source=meta&utm_campaign=launch1
 const attribution = {
-  market: marketKey,
-  variant: qs.get('v') || 'a',
-  utm_source: qs.get('utm_source') || '',
-  utm_medium: qs.get('utm_medium') || '',
-  utm_campaign: qs.get('utm_campaign') || '',
-  utm_content: qs.get('utm_content') || ''
+  market: marketKey, audience: audience, variant: qs.get('v') || 'a',
+  utm_source: qs.get('utm_source') || '', utm_medium: qs.get('utm_medium') || '',
+  utm_campaign: qs.get('utm_campaign') || '', utm_content: qs.get('utm_content') || ''
 };
 
-/* ---------- Copy ---------- */
-const t = Object.assign({}, CONFIG.copy.en, CONFIG.copy[market.lang]);
-document.documentElement.lang = market.lang;
-document.getElementById('headline').textContent = t.headline;
-document.getElementById('sub').textContent = t.sub;
-document.getElementById('points').innerHTML = t.points.map(p => '<li></li>').join('');
-document.querySelectorAll('#points li').forEach((li, i) => { li.textContent = t.points[i]; });
-document.getElementById('price-legend').textContent = t.priceLegend;
-document.getElementById('email-label').textContent = t.emailLabel;
-document.getElementById('cta').textContent = t.cta;
-document.getElementById('legal').textContent = market.consent ? t.legalEU : t.legal;
-if (!market.consent) document.getElementById('dnss').hidden = false;
+/* ---------- Render ---------- */
+const $ = id => document.getElementById(id);
+$('headline').textContent = t.headline;
+$('sub').textContent = t.sub;
+t.points.forEach(p => { const li = document.createElement('li'); li.textContent = p; $('points').appendChild(li); });
+$('email-label').textContent = 'Email address';
+$('cta').textContent = t.cta;
+$('legal').textContent = market.consent ? t.legalEU : t.legalUS;
+if (!market.consent) $('dnss').hidden = false;
 
-const fmt = new Intl.NumberFormat(market.locale, { style: 'currency', currency: market.currency });
-const pricesEl = document.getElementById('prices');
-market.prices.forEach((p, i) => {
-  const label = document.createElement('label');
-  label.innerHTML = '<input type="radio" name="price" value="' + p + '"><strong></strong><span></span>';
-  label.querySelector('strong').textContent = fmt.format(p);
-  label.querySelector('span').textContent = t.perMonth;
-  label.querySelector('input').addEventListener('change', () => track('price_click', { price: p, currency: market.currency }));
-  pricesEl.appendChild(label);
-});
+const other = new URLSearchParams(location.search);
+audience === 'dog' ? other.set('a', 'shelter') : other.delete('a');
+$('switch').textContent = t.switchText;
+$('switch').href = '?' + other.toString();
+
+if (audience === 'dog') {
+  $('price-legend').textContent = t.priceLegend;
+  $('price-hint').textContent = t.priceHint;
+  const fmt = new Intl.NumberFormat(market.locale, { style: 'currency', currency: market.currency });
+  market.prices.forEach(p => {
+    const label = document.createElement('label');
+    label.innerHTML = '<input type="radio" name="price"><strong></strong><span>per month</span>';
+    label.querySelector('input').value = p;
+    label.querySelector('strong').textContent = fmt.format(p);
+    label.querySelector('input').addEventListener('change', () => track('price_click', { price: p, currency: market.currency }));
+    $('prices').appendChild(label);
+  });
+} else {
+  $('price-set').hidden = true;
+  $('org-field').hidden = false;
+  $('dogs-field').hidden = false;
+}
 
 /* ---------- Consent-gated tracking ---------- */
 const CONSENT_KEY = 'auli_consent';
@@ -175,47 +193,45 @@ const safeSet = (k, v) => { try { localStorage.setItem(k, v); } catch (e) {} };
 const hasConsent = () => !market.consent || safeGet(CONSENT_KEY) === 'yes';
 const optedOutUS = () => safeGet('auli_dnss') === 'yes';
 
-function track(name, extra) {
-  if (!hasConsent() || optedOutUS()) return;
-  const payload = Object.assign({ event: name, ts: new Date().toISOString() }, attribution, extra || {});
-  send(payload);
-}
 function send(payload) {
   if (!CONFIG.endpoint) { console.log('[auli]', payload); return; }
   const body = JSON.stringify(payload);
-  if (navigator.sendBeacon && payload.event !== 'signup') {
+  if (payload.event !== 'signup' && navigator.sendBeacon) {
     navigator.sendBeacon(CONFIG.endpoint, new Blob([body], { type: 'text/plain' }));
   } else {
     fetch(CONFIG.endpoint, { method: 'POST', headers: { 'Content-Type': 'text/plain' }, body: body, keepalive: true }).catch(() => {});
   }
 }
-
-const bar = document.getElementById('consent');
-if (market.consent && safeGet(CONSENT_KEY) === null) {
-  document.getElementById('consent-text').textContent = t.consent;
-  document.getElementById('consent-yes').textContent = t.accept;
-  document.getElementById('consent-no').textContent = t.decline;
-  bar.style.display = 'block';
-  document.getElementById('consent-yes').onclick = () => { safeSet(CONSENT_KEY, 'yes'); bar.style.display = 'none'; track('page_view'); };
-  document.getElementById('consent-no').onclick = () => { safeSet(CONSENT_KEY, 'no'); bar.style.display = 'none'; };
+function track(name, extra) {
+  if (!hasConsent() || optedOutUS()) return;
+  send(Object.assign({ event: name, ts: new Date().toISOString() }, attribution, extra || {}));
 }
-document.getElementById('dnss').onclick = e => { e.preventDefault(); safeSet('auli_dnss', 'yes'); e.target.textContent = 'Preference saved'; };
+
+if (market.consent && safeGet(CONSENT_KEY) === null) {
+  $('consent').style.display = 'block';
+  $('consent-yes').onclick = () => { safeSet(CONSENT_KEY, 'yes'); $('consent').style.display = 'none'; track('page_view'); };
+  $('consent-no').onclick = () => { safeSet(CONSENT_KEY, 'no'); $('consent').style.display = 'none'; };
+}
+$('dnss').onclick = e => { e.preventDefault(); safeSet('auli_dnss', 'yes'); e.target.textContent = 'Preference saved'; };
 track('page_view');
 
 /* ---------- Signup ---------- */
-document.getElementById('form').addEventListener('submit', e => {
+$('form').addEventListener('submit', e => {
   e.preventDefault();
-  const email = document.getElementById('email').value.trim();
-  if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) { alert(t.invalid); return; }
+  const email = $('email').value.trim();
+  if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) { alert('Please enter a valid email address.'); return; }
   const chosen = document.querySelector('input[name=price]:checked');
-  // A signup is the user's own request, so it is always sent, even without analytics consent.
-  send(Object.assign({ event: 'signup', ts: new Date().toISOString(), email: email,
+  // A signup is the visitor's own request, so it is sent even without analytics consent.
+  send(Object.assign({
+    event: 'signup', ts: new Date().toISOString(), email: email,
     price: chosen ? Number(chosen.value) : null, currency: market.currency,
-    double_opt_in: market.consent }, attribution));
-  document.getElementById('form').style.display = 'none';
-  const done = document.getElementById('done');
-  done.textContent = market.consent ? t.done : (t.doneUS || t.done);
-  done.style.display = 'block';
+    org: audience === 'shelter' ? $('org').value.trim() : '',
+    dogs_in_care: audience === 'shelter' ? Number($('dogs').value) || 0 : null,
+    double_opt_in: market.consent
+  }, attribution));
+  $('form').hidden = true;
+  $('done').textContent = market.consent ? t.doneEU : t.doneUS;
+  $('done').style.display = 'block';
 });
 </script>
 </body>
