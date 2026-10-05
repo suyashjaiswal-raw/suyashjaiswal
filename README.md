@@ -16,7 +16,7 @@ Before launch, edit `CONFIG` at the top of the script:
 2. Replace the placeholder Auli+ price points with your real hypotheses.
 3. Link a real privacy policy. The EU/UK copy refers to one.
 
-Things the page does not do for you: it does not send the double opt-in confirmation email (connect your email tool to the endpoint), and it only promises features that work in every market. Add vet booking, pharmacy, insurance or emergency services to a market's copy only once they are live there.
+Things the page does not do for you: it does not send the double opt-in confirmation email (connect your email tool to the endpoint), and it only promises what is real today: records, vaccinations, reminders, documents, Auli Intelligence, the nearby vet and pharmacy map, and Auli+. Vet booking, pharmacy orders, insurance, emergency help, the community feed and Pawbook are prototypes or sample content, so keep them out of the copy until real providers and data are behind them.
 
 Analytics are consent-gated in the UK and EU; the US shows a "Do not sell or share" opt-out. Signups are always sent because they are the visitor's own request.
 

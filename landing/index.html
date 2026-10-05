@@ -94,8 +94,10 @@ const CONFIG = {
     nl: { currency: 'EUR', locale: 'en-NL', prices: [7.49, 11.99, 17.99], consent: true },
     de: { currency: 'EUR', locale: 'en-DE', prices: [7.49, 11.99, 17.99], consent: true }
   },
-  // Only promise features that work in every test market. Vet booking, pharmacy, insurance and
-  // emergency services are location-dependent: add them to a market's copy only once they are live there.
+  // Only promise what is real today: records, vaccinations, reminders, documents, Auli Intelligence,
+  // the nearby vet/pharmacy map and Auli+. Vet booking, pharmacy orders, insurance, emergency help,
+  // the community feed and Pawbook are prototypes or sample content: do not add them to any copy
+  // until real providers and data sit behind them.
   audiences: {
     dog: {
       headline: 'The operating system for your dog’s life.',
@@ -103,7 +105,7 @@ const CONFIG = {
       points: [
         'Every record, vaccination and medication in one place, with reminders',
         'Auli Intelligence: care guidance grounded in your dog’s own profile',
-        'Pawbook: every memory, kept beautifully'
+        'Find nearby vets and pharmacies on a map, wherever you are'
       ],
       priceLegend: 'What would you pay each month for Auli+?',
       priceHint: 'Auli+ unlocks Auli Intelligence. Pick the price that feels fair; this is not a purchase.',
